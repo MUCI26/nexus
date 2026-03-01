@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useSearchParams } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
@@ -33,23 +33,22 @@ export default function SearchPage() {
   const searchParams = useSearchParams()
   const query = searchParams.get("q") || ""
   
-  const [Ergebnisse, setResults] = useState<{
+  const [results, setResults] = useState<{
     notes: Note[]
     todos: Todo[]
     thoughts: Thought[]
   }>({ notes: [], todos: [], thoughts: [] })
 
-  useEffect(() => {
-    if (query) {
-      fetchSearchResults()
-    }
-  }, [query])
-
-  const fetchSearchResults = async () => {
+  const fetchSearchResults = useCallback(async () => {
+    if (!query) return
     const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`)
     const data = await res.json()
     setResults(data)
-  }
+  }, [query])
+
+  useEffect(() => {
+    fetchSearchResults()
+  }, [fetchSearchResults])
 
   const parseTags = (tags: string | null) => {
     if (!tags) return []
@@ -60,23 +59,23 @@ export default function SearchPage() {
     }
   }
 
-  const totalResults = Ergebnisse.notes.length + Ergebnisse.todos.length + Ergebnisse.thoughts.length
+  const totalResults = results.notes.length + results.todos.length + results.thoughts.length
 
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">
-        Suchergebnisse für "{query}"
+        Suchergebnisse für &quot;{query}&quot;
       </h1>
       
       <p className="text-muted-foreground">
         Gefunden {totalResults} Ergebnisse
       </p>
 
-      {Ergebnisse.notes.length > 0 && (
+      {results.notes.length > 0 && (
         <div className="space-y-3">
-          <h2 className="text-xl font-semibold">Notes</h2>
+          <h2 className="text-xl font-semibold">Notizen</h2>
           <div className="grid gap-4 md:grid-cols-2">
-            {Ergebnisse.notes.map((note) => (
+            {results.notes.map((note) => (
               <Link href={`/notes`} key={note.id}>
                 <Card className="hover:bg-muted/50 transition-colors">
                   <CardHeader>
@@ -102,11 +101,11 @@ export default function SearchPage() {
         </div>
       )}
 
-      {Ergebnisse.todos.length > 0 && (
+      {results.todos.length > 0 && (
         <div className="space-y-3">
-          <h2 className="text-xl font-semibold">Todos</h2>
+          <h2 className="text-xl font-semibold">Aufgaben</h2>
           <div className="space-y-2">
-            {Ergebnisse.todos.map((todo) => (
+            {results.todos.map((todo) => (
               <Link href={`/todos`} key={todo.id}>
                 <Card className="hover:bg-muted/50 transition-colors">
                   <CardContent className="flex items-center gap-4 p-4">
@@ -122,11 +121,11 @@ export default function SearchPage() {
         </div>
       )}
 
-      {Ergebnisse.thoughts.length > 0 && (
+      {results.thoughts.length > 0 && (
         <div className="space-y-3">
-          <h2 className="text-xl font-semibold">Thoughts</h2>
+          <h2 className="text-xl font-semibold">Gedanken</h2>
           <div className="grid gap-4 md:grid-cols-2">
-            {Ergebnisse.thoughts.map((thought) => (
+            {results.thoughts.map((thought) => (
               <Link href={`/thoughts`} key={thought.id}>
                 <Card className="hover:bg-muted/50 transition-colors">
                   <CardHeader className="flex flex-row items-center gap-2">
@@ -147,7 +146,7 @@ export default function SearchPage() {
 
       {totalResults === 0 && query && (
         <div className="text-center py-12">
-          <p className="text-muted-foreground">No Ergebnisse found for "{query}"</p>
+          <p className="text-muted-foreground">Keine Ergebnisse gefunden für &quot;{query}&quot;</p>
         </div>
       )}
     </div>
