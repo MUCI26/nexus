@@ -1,18 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 // Lazy initialization - only when needed
-let webpush: typeof import('web-push') | null = null
+let webpushInstance: typeof import('web-push') | null = null
 
-function getWebPush() {
-  if (!webpush) {
-    webpush = require('web-push')
+function getWebPush(): typeof import('web-push') | null {
+  if (!webpushInstance) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const wp = require('web-push')
+    webpushInstance = wp
+    
     const vapidPublicKey = process.env.VAPID_PUBLIC_KEY
     const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY
     
     // Only set VAPID if keys are provided
     if (vapidPublicKey && vapidPrivateKey && vapidPublicKey.length > 20) {
       try {
-        webpush.setVapidDetails(
+        wp.setVapidDetails(
           'mailto:nexus@app.com',
           vapidPublicKey,
           vapidPrivateKey
@@ -22,7 +25,7 @@ function getWebPush() {
       }
     }
   }
-  return webpush
+  return webpushInstance
 }
 
 export async function POST(request: NextRequest) {
