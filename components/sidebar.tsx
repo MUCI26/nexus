@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation"
 import { Input } from "@/components/ui/input"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { LayoutDashboard, FileText, CheckSquare, Cloud, Search, Sparkles } from "lucide-react"
+import { LayoutDashboard, FileText, CheckSquare, Cloud, Search, Sparkles, Bell } from "lucide-react"
 
 export function Sidebar() {
   const pathname = usePathname()
@@ -78,13 +78,16 @@ export function Sidebar() {
       </nav>
 
       <div className="p-4 border-t border-slate-800">
-        <div className="bg-slate-800 rounded-2xl p-4">
-          <div className="flex items-center gap-2 mb-2">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-            <span className="text-xs font-medium text-emerald-500">Online</span>
+            <span className="text-xs text-slate-400">Online</span>
           </div>
-          <p className="text-sm font-medium text-white">Nexus MVP</p>
-          <p className="text-xs text-slate-400">Version 1.0</p>
+          <Bell className="w-4 h-4 text-slate-500" />
+        </div>
+        <div className="bg-slate-800 rounded-xl p-3">
+          <p className="text-sm font-medium text-white">Nexus Cloud</p>
+          <p className="text-xs text-slate-400">v1.0 • PostgreSQL</p>
         </div>
       </div>
     </aside>
