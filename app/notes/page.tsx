@@ -1,11 +1,11 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardInhalt, CardHeader, CardTitel } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogInhalt, DialogHeader, DialogTitel, DialogTrigger } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 
@@ -19,26 +19,26 @@ interface Note {
   updatedAt: string
 }
 
-export default function NotesPage() {
-  const [notes, setNotes] = useState<Note[]>([])
+export default function NotizenPage() {
+  const [notes, setNotizen] = useState<Note[]>([])
   const [newNote, setNewNote] = useState({ title: "", content: "", tags: "" })
   const [editingNote, setEditingNote] = useState<Note | null>(null)
   const [isOpen, setIsOpen] = useState(false)
 
   useEffect(() => {
-    fetchNotes()
+    fetchNotizen()
   }, [])
 
-  const fetchNotes = async () => {
+  const fetchNotizen = async () => {
     const res = await fetch("/api/notes")
     const data = await res.json()
-    setNotes(data)
+    setNotizen(data)
   }
 
   const createNote = async () => {
     await fetch("/api/notes", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Inhalt-Type": "application/json" },
       body: JSON.stringify({
         ...newNote,
         tags: newNote.tags ? newNote.tags.split(",").map((t) => t.trim()) : []
@@ -46,24 +46,24 @@ export default function NotesPage() {
     })
     setNewNote({ title: "", content: "", tags: "" })
     setIsOpen(false)
-    fetchNotes()
+    fetchNotizen()
   }
 
   const toggleFavorite = async (note: Note) => {
     await fetch(`/api/notes/${note.id}`, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Inhalt-Type": "application/json" },
       body: JSON.stringify({ isFavorite: !note.isFavorite })
     })
-    fetchNotes()
+    fetchNotizen()
   }
 
   const deleteNote = async (id: string) => {
     await fetch(`/api/notes/${id}`, { method: "DELETE" })
-    fetchNotes()
+    fetchNotizen()
   }
 
-  const parseTags = (tags: string | null) => {
+  const parseSchlagwörter = (tags: string | null) => {
     if (!tags) return []
     try {
       return JSON.parse(tags)
@@ -75,35 +75,35 @@ export default function NotesPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Notes</h1>
+        <h1 className="text-3xl font-bold">Notizen</h1>
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
-            <Button>+ New Note</Button>
+            <Button>+ Neue Notiz</Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
+          <DialogInhalt className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>Create New Note</DialogTitle>
+              <DialogTitel>Create Neue Notiz</DialogTitel>
             </DialogHeader>
             <div className="space-y-4 mt-4">
               <Input
-                placeholder="Title"
+                placeholder="Titel"
                 value={newNote.title}
                 onChange={(e) => setNewNote({ ...newNote, title: e.target.value })}
               />
               <Textarea
-                placeholder="Content (supports Markdown)"
+                placeholder="Inhalt (supports Markdown)"
                 rows={10}
                 value={newNote.content}
                 onChange={(e) => setNewNote({ ...newNote, content: e.target.value })}
               />
               <Input
-                placeholder="Tags (comma separated)"
+                placeholder="Schlagwörter (comma separated)"
                 value={newNote.tags}
                 onChange={(e) => setNewNote({ ...newNote, tags: e.target.value })}
               />
-              <Button onClick={createNote} className="w-full">Create Note</Button>
+              <Button onClick={createNote} className="w-full">Notiz erstellen</Button>
             </div>
-          </DialogContent>
+          </DialogInhalt>
         </Dialog>
       </div>
 
@@ -112,7 +112,7 @@ export default function NotesPage() {
           <Card key={note.id}>
             <CardHeader>
               <div className="flex items-start justify-between">
-                <CardTitle className="text-lg">{note.title}</CardTitle>
+                <CardTitel className="text-lg">{note.title}</CardTitel>
                 <div className="flex items-center gap-2">
                   <Button
                     variant="ghost"
@@ -131,17 +131,17 @@ export default function NotesPage() {
                 </div>
               </div>
               <div className="flex flex-wrap gap-1 mt-2">
-                {parseTags(note.tags).map((tag: string) => (
+                {parseSchlagwörter(note.tags).map((tag: string) => (
                   <Badge key={tag} variant="secondary">{tag}</Badge>
                 ))}
               </div>
             </CardHeader>
-            <CardContent>
+            <CardInhalt>
               <div className="whitespace-pre-wrap text-sm text-muted-foreground">
                 {note.content.slice(0, 200)}
                 {note.content.length > 200 && "..."}
               </div>
-            </CardContent>
+            </CardInhalt>
           </Card>
         ))}
       </div>

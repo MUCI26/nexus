@@ -48,16 +48,16 @@ export default function ThoughtsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Quick Thoughts</h1>
+        <h1 className="text-3xl font-bold">Schnelle Gedanken</h1>
         <p className="text-muted-foreground">
-          Capture your momentary ideas and feelings
+          Fange deine spontanen Ideen und Gefühle ein
         </p>
       </div>
 
       <Card>
         <CardContent className="p-6 space-y-4">
           <Textarea
-            placeholder="What's on your mind?"
+            placeholder="Was beschäftigt dich gerade?"
             rows={3}
             value={newThought.content}
             onChange={(e) => setNewThought({ ...newThought, content: e.target.value })}
@@ -77,7 +77,7 @@ export default function ThoughtsPage() {
               ))}
             </div>
             <Button onClick={createThought} className="ml-auto">
-              Add Thought
+              Gedanken hinzufügen
             </Button>
           </div>
         </CardContent>
