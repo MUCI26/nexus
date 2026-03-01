@@ -9,6 +9,7 @@ export async function GET() {
     })
     return NextResponse.json(todos)
   } catch (error) {
+    console.error('Todos GET error:', error)
     return NextResponse.json({ error: 'Failed to fetch todos' }, { status: 500 })
   }
 }
@@ -25,12 +26,14 @@ export async function POST(request: NextRequest) {
         description,
         priority: priority || 'medium',
         dueDate: dueDate ? new Date(dueDate) : null,
-        isCompleted: false
+        isCompleted: false,
+        userId: 'temp-user-id'
       }
     })
     
     return NextResponse.json(todo, { status: 201 })
   } catch (error) {
+    console.error('Todos POST error:', error)
     return NextResponse.json({ error: 'Failed to create todo' }, { status: 500 })
   }
 }

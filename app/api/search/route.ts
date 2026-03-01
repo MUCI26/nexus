@@ -29,6 +29,7 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json({ notes, todos, thoughts })
   } catch (error) {
+    console.error('Search error:', error)
     return NextResponse.json({ error: 'Search failed' }, { status: 500 })
   }
 }

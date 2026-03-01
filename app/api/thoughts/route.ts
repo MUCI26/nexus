@@ -9,6 +9,7 @@ export async function GET() {
     })
     return NextResponse.json(thoughts)
   } catch (error) {
+    console.error('Thoughts GET error:', error)
     return NextResponse.json({ error: 'Failed to fetch thoughts' }, { status: 500 })
   }
 }
@@ -22,12 +23,14 @@ export async function POST(request: NextRequest) {
     const thought = await prisma.thought.create({
       data: {
         content,
-        mood: mood || '🤔'
+        mood: mood || '🤔',
+        userId: 'temp-user-id'
       }
     })
     
     return NextResponse.json(thought, { status: 201 })
   } catch (error) {
+    console.error('Thoughts POST error:', error)
     return NextResponse.json({ error: 'Failed to create thought' }, { status: 500 })
   }
 }
