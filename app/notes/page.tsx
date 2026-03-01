@@ -1,13 +1,13 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Card, CardInhalt, CardHeader, CardTitel } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Dialog, DialogInhalt, DialogHeader, DialogTitel, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
-import { Checkbox } from "@/components/ui/checkbox"
+import { FileText, Plus, Star, Trash2, X } from "lucide-react"
 
 interface Note {
   id: string
@@ -19,26 +19,25 @@ interface Note {
   updatedAt: string
 }
 
-export default function NotizenPage() {
-  const [notes, setNotizen] = useState<Note[]>([])
+export default function NotesPage() {
+  const [notes, setNotes] = useState<Note[]>([])
   const [newNote, setNewNote] = useState({ title: "", content: "", tags: "" })
-  const [editingNote, setEditingNote] = useState<Note | null>(null)
   const [isOpen, setIsOpen] = useState(false)
 
   useEffect(() => {
-    fetchNotizen()
+    fetchNotes()
   }, [])
 
-  const fetchNotizen = async () => {
+  const fetchNotes = async () => {
     const res = await fetch("/api/notes")
     const data = await res.json()
-    setNotizen(data)
+    setNotes(data)
   }
 
   const createNote = async () => {
     await fetch("/api/notes", {
       method: "POST",
-      headers: { "Inhalt-Type": "application/json" },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         ...newNote,
         tags: newNote.tags ? newNote.tags.split(",").map((t) => t.trim()) : []
@@ -46,24 +45,24 @@ export default function NotizenPage() {
     })
     setNewNote({ title: "", content: "", tags: "" })
     setIsOpen(false)
-    fetchNotizen()
+    fetchNotes()
   }
 
   const toggleFavorite = async (note: Note) => {
     await fetch(`/api/notes/${note.id}`, {
       method: "PATCH",
-      headers: { "Inhalt-Type": "application/json" },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ isFavorite: !note.isFavorite })
     })
-    fetchNotizen()
+    fetchNotes()
   }
 
   const deleteNote = async (id: string) => {
     await fetch(`/api/notes/${id}`, { method: "DELETE" })
-    fetchNotizen()
+    fetchNotes()
   }
 
-  const parseSchlagwörter = (tags: string | null) => {
+  const parseTags = (tags: string | null) => {
     if (!tags) return []
     try {
       return JSON.parse(tags)
@@ -75,14 +74,26 @@ export default function NotizenPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Notizen</h1>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
+            <FileText className="w-5 h-5 text-amber-600" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">Notizen</h1>
+            <p className="text-sm text-slate-500">{notes.length} gespeichert</p>
+          </div>
+        </div>
+        
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
-            <Button>+ Neue Notiz</Button>
+            <Button className="bg-slate-900 hover:bg-slate-800">
+              <Plus className="w-4 h-4 mr-2" />
+              Neue Notiz
+            </Button>
           </DialogTrigger>
-          <DialogInhalt className="max-w-2xl">
+          <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitel>Create Neue Notiz</DialogTitel>
+              <DialogTitle>Neue Notiz</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 mt-4">
               <Input
@@ -91,57 +102,58 @@ export default function NotizenPage() {
                 onChange={(e) => setNewNote({ ...newNote, title: e.target.value })}
               />
               <Textarea
-                placeholder="Inhalt (supports Markdown)"
+                placeholder="Inhalt (Markdown wird unterstützt)"
                 rows={10}
                 value={newNote.content}
                 onChange={(e) => setNewNote({ ...newNote, content: e.target.value })}
               />
               <Input
-                placeholder="Schlagwörter (comma separated)"
+                placeholder="Schlagwörter (kommagetrennt)"
                 value={newNote.tags}
                 onChange={(e) => setNewNote({ ...newNote, tags: e.target.value })}
               />
-              <Button onClick={createNote} className="w-full">Notiz erstellen</Button>
+              <Button onClick={createNote} className="w-full"><Plus className="w-4 h-4 mr-2" />Notiz erstellen</Button>
             </div>
-          </DialogInhalt>
+          </DialogContent>
         </Dialog>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {notes.map((note) => (
-          <Card key={note.id}>
-            <CardHeader>
+          <Card key={note.id} className="group border-0 shadow-sm hover:shadow-md transition-shadow">
+            <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
-                <CardTitel className="text-lg">{note.title}</CardTitel>
-                <div className="flex items-center gap-2">
+                <CardTitle className="text-lg font-semibold">{note.title}</CardTitle>
+                <div className="flex items-center gap-1">
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => toggleFavorite(note)}
+                    className={note.isFavorite ? "text-amber-500" : "text-slate-400"}
                   >
-                    {note.isFavorite ? "⭐" : "☆"}
+                    <Star className={`w-4 h-4 ${note.isFavorite ? "fill-current" : ""}`} />
                   </Button>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => deleteNote(note.id)}
+                    className="text-slate-400 hover:text-red-500"
                   >
-                    🗑️
+                    <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>
               </div>
               <div className="flex flex-wrap gap-1 mt-2">
-                {parseSchlagwörter(note.tags).map((tag: string) => (
-                  <Badge key={tag} variant="secondary">{tag}</Badge>
+                {parseTags(note.tags).map((tag: string) => (
+                  <Badge key={tag} variant="secondary" className="text-xs">{tag}</Badge>
                 ))}
               </div>
             </CardHeader>
-            <CardInhalt>
-              <div className="whitespace-pre-wrap text-sm text-muted-foreground">
-                {note.content.slice(0, 200)}
-                {note.content.length > 200 && "..."}
+            <CardContent>
+              <div className="whitespace-pre-wrap text-sm text-slate-600 line-clamp-4">
+                {note.content}
               </div>
-            </CardInhalt>
+            </CardContent>
           </Card>
         ))}
       </div>
